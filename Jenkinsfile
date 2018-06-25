@@ -24,13 +24,14 @@ pipeline {
 				doGenerateSubmoduleConfigurations: false, extensions: [], gitTool:
 				'Git_Centos', submoduleCfg: [], userRemoteConfigs: [[credentialsId:
 				'GitHub_julianrivera0812', url:
-				'https://github.com/julianrivera0812/Parqueadero-ADN']]])
+				'https://github.com/julianrivera0812/Parqueadero-ADN']]])				
+				sh 'gradle --b ./build.gradle compileJava'
 			}
 		 }
 		 stage('Unit Tests') {
 			 steps{
 				echo "------------>Unit Tests<------------"
-				sh 'gradle --b ./build.gradle test'
+				sh 'gradle --b ./build.gradle cleanTest test'
 			 }
 		 }
 		 stage('Integration Tests') {
@@ -60,7 +61,7 @@ pipeline {
 		 }
 		 success {
 			echo 'This will run only if successful'
-			junit '**/build/test-results/test/*.xml'
+			junit '**/jacoco/test-results/*.xml'
 		 }
 		 failure {
 			echo 'This will run only if failed'
