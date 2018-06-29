@@ -17,10 +17,10 @@ pipeline {
 	 }
 	 //Aquí comienzan los “items” del Pipeline
 	 stages{
-		 stage('Checkout') {
+		 stage('Checkout and Compile') {
 			steps{
 				echo "------------>Checkout<------------"
-				checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+				checkout([$class: 'GitSCM', branches: [[name: '*/feature_registryEntryVehicle']],
 				doGenerateSubmoduleConfigurations: false, extensions: [], gitTool:
 				'Git_Centos', submoduleCfg: [], userRemoteConfigs: [[credentialsId:
 				'GitHub_julianrivera0812', url:
@@ -37,6 +37,7 @@ pipeline {
 		 stage('Integration Tests') {
 			 steps {
 				echo "------------>Integration Tests<------------"
+				sh 'gradle --b ./build.gradle integrationTest'
 			 }
 		 }
 		 stage('Static Code Analysis') {

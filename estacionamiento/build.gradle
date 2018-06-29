@@ -35,11 +35,26 @@ dependencies {
 }
 
 test {
+	useJUnit {
+       exclude '**/*IT.*'
+       exclude '**/*FT.*'
+    }
 	jacoco {
 		append = false
 		destinationFile = file("jacoco/jacocoTest.exec")
 	}
-	reports.junitXml.destination =  file("jacoco/test-results")
+	reports.junitXml.destination =  file("jacoco/test-results/test")
 }
 
-jacocoTestReport.dependsOn(test)
+task integrationTest(type: Test, description: 'Runs the integration tests', group: 'Verification') {
+   useJUnit {
+       include '**/*IT.*'
+   }
+   jacoco {
+		append = true
+		destinationFile = file("jacoco/jacocoIntegrationTest.exec")
+	}
+	reports.junitXml.destination =  file("jacoco/test-results/integrationTest")
+}
+
+jacocoTestReport.dependsOn(test, integrationTest)
