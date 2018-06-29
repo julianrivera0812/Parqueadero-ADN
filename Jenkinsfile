@@ -17,14 +17,9 @@ pipeline {
 	 }
 	 //Aquí comienzan los “items” del Pipeline
 	 stages{
-		 stage('Checkout and Compile') {
+		 stage('Compile') {
 			steps{
-				echo "------------>Checkout<------------"
-				checkout([$class: 'GitSCM', branches: [[name: '*/feature_registryEntryVehicle']],
-				doGenerateSubmoduleConfigurations: false, extensions: [], gitTool:
-				'Git_Centos', submoduleCfg: [], userRemoteConfigs: [[credentialsId:
-				'GitHub_julianrivera0812', url:
-				'https://github.com/julianrivera0812/Parqueadero-ADN']]])				
+				echo "------------>Compile<------------"			
 				sh 'gradle --b ./build.gradle compileJava'
 			}
 		 }
