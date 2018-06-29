@@ -51,7 +51,7 @@ task integrationTest(type: Test, description: 'Runs the integration tests', grou
        include '**/*IT.*'
    }
    jacoco {
-		append = true
+		append = false
 		destinationFile = file("jacoco/jacocoIntegrationTest.exec")
 	}
 	reports.junitXml.destination =  file("jacoco/test-results/integrationTest")
