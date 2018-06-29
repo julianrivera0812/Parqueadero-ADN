@@ -3,9 +3,9 @@ package co.ceiba.adn.estacionamiento.util;
 import java.util.Calendar;
 import java.util.Date;
 
-public final class ValidationUtil {
+public final class DateValidator {
 
-	private ValidationUtil() {
+	private DateValidator() {
 	}
 
 	public static final boolean isMondayOrSunday(Date date) {

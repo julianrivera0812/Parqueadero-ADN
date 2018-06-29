@@ -20,7 +20,6 @@ import co.ceiba.adn.estacionamiento.converter.VehicleConverter;
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.entity.Car;
 import co.ceiba.adn.estacionamiento.entity.Motorcycle;
-import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
@@ -55,7 +54,7 @@ public class VehicleControlServiceTest {
 		calendar.set(2018, Calendar.JUNE, 25);
 
 		// Act
-		boolean result = vehicleControlService.isEnableDay(plate, calendar.getTime());
+		boolean result = vehicleControlService.isEnableDayByPlate(plate, calendar.getTime());
 
 		// Assert
 		Assert.assertTrue(result);
@@ -70,7 +69,7 @@ public class VehicleControlServiceTest {
 		calendar.set(2018, Calendar.JUNE, 25);
 
 		// Act
-		boolean result = vehicleControlService.isEnableDay(plate, calendar.getTime());
+		boolean result = vehicleControlService.isEnableDayByPlate(plate, calendar.getTime());
 
 		// Assert
 		Assert.assertTrue(result);
@@ -85,7 +84,7 @@ public class VehicleControlServiceTest {
 		calendar.set(2018, Calendar.JUNE, 27);
 
 		// Act
-		boolean result = vehicleControlService.isEnableDay(plate, calendar.getTime());
+		boolean result = vehicleControlService.isEnableDayByPlate(plate, calendar.getTime());
 
 		// Assert
 		Assert.assertFalse(result);
@@ -102,8 +101,7 @@ public class VehicleControlServiceTest {
 		when(vehicleRepository.existsById(motorcycleModel.getPlate())).thenReturn(true);
 
 		when(vehicleControlRepository.save(any())).thenReturn(new VehicleControl());
-		when(vehicleControlRepository.countByDepartureDateIsNull(VehicleTypeEnum.MOTORCYCLE.name()))
-				.thenReturn(Optional.of(11L));
+		when(vehicleControlRepository.countByDepartureDateIsNull(Motorcycle.class)).thenReturn(Optional.of(11L));
 
 		when(vehicleConverter.modelToEntity(any())).thenCallRealMethod();
 
@@ -124,8 +122,7 @@ public class VehicleControlServiceTest {
 		when(vehicleRepository.existsById(carModel.getPlate())).thenReturn(true);
 
 		when(vehicleControlRepository.save(any())).thenReturn(new VehicleControl());
-		when(vehicleControlRepository.countByDepartureDateIsNull(VehicleTypeEnum.CAR.name()))
-				.thenReturn(Optional.of(21L));
+		when(vehicleControlRepository.countByDepartureDateIsNull(Car.class)).thenReturn(Optional.of(21L));
 
 		when(vehicleConverter.modelToEntity(any())).thenCallRealMethod();
 
@@ -147,8 +144,7 @@ public class VehicleControlServiceTest {
 		when(vehicleRepository.existsById(motorcycleModel.getPlate())).thenReturn(true);
 
 		when(vehicleControlRepository.save(any())).thenReturn(new VehicleControl());
-		when(vehicleControlRepository.countByDepartureDateIsNull(VehicleTypeEnum.MOTORCYCLE.name()))
-				.thenReturn(Optional.of(0L));
+		when(vehicleControlRepository.countByDepartureDateIsNull(Motorcycle.class)).thenReturn(Optional.of(0L));
 
 		when(vehicleConverter.modelToEntity(any())).thenCallRealMethod();
 

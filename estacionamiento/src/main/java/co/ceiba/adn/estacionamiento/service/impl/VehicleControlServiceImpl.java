@@ -14,7 +14,7 @@ import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
 import co.ceiba.adn.estacionamiento.service.VehicleControlService;
-import co.ceiba.adn.estacionamiento.util.ValidationUtil;
+import co.ceiba.adn.estacionamiento.util.DateValidator;
 
 @Service("vehicleControlService")
 public class VehicleControlServiceImpl implements VehicleControlService {
@@ -45,21 +45,18 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 		ResponseDTO response = new ResponseDTO();
 
-		if (hasSpaceForVehicle(vehicle.getType())) {
+		if (hasSpaceForVehicle(vehicle)) {
 
-			if (!isEnableDay(vehicleModel.getPlate(), currentDate)) {
+			if (isEnableDayByPlate(vehicleModel.getPlate(), currentDate)) {
 
-				response.setCode(1);
-				response.setMessage("no puede ingresar porque no está en un dia hábil");
+				saveRegisterEntryData(vehicleModel, currentDate, vehicle);
 
 			} else {
 
-				if (!vehicleRepository.existsById(vehicleModel.getPlate())) {
-					vehicle = vehicleRepository.save(vehicle);
-				}
-
-				vehicleControlRepository.save(new VehicleControl(vehicle, currentDate));
+				response.setCode(1);
+				response.setMessage("no puede ingresar porque no está en un dia hábil");
 			}
+
 		} else {
 			response.setCode(2);
 			response.setMessage("no puede ingresar porque no hay cupo disponible");
@@ -68,26 +65,35 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 		return response;
 	}
 
-	public boolean isEnableDay(String plate, Date date) {
+	private void saveRegisterEntryData(VehicleModel vehicleModel, Date currentDate, Vehicle vehicle) {
+		if (!vehicleRepository.existsById(vehicleModel.getPlate())) {
+			vehicle = vehicleRepository.save(vehicle);
+		}
+
+		vehicleControlRepository.save(new VehicleControl(vehicle, currentDate));
+	}
+
+	public boolean isEnableDayByPlate(String plate, Date date) {
 
 		boolean result = true;
 
-		if (plate.startsWith("A") && !ValidationUtil.isMondayOrSunday(date)) {
+		if (plate.startsWith("A") && !DateValidator.isMondayOrSunday(date)) {
 			result = false;
 		}
 
 		return result;
 	}
 
-	public long countVehicleInParkingByType(VehicleTypeEnum vehicleType) {
-		return vehicleControlRepository.countByDepartureDateIsNull(vehicleType.name()).orElse(0L);
+	public long countVehicleInParkingByType(Class<? extends Vehicle> vehicleType) {
+		return vehicleControlRepository.countByDepartureDateIsNull(vehicleType).orElse(0L);
 	}
 
-	public boolean hasSpaceForVehicle(VehicleTypeEnum vehicleType) {
+	public boolean hasSpaceForVehicle(Vehicle vehicle) {
 
-		int maxValue = VehicleTypeEnum.MOTORCYCLE.equals(vehicleType) ? MAX_AMOUNT_MOTORCYCLE : MAX_AMOUNT_CAR;
+		int maxValue = VehicleTypeEnum.MOTORCYCLE.equals(vehicle.getType()) ? MAX_AMOUNT_MOTORCYCLE
+				: MAX_AMOUNT_CAR;
 
-		return countVehicleInParkingByType(vehicleType) < maxValue;
+		return countVehicleInParkingByType(vehicle.getClass()) < maxValue;
 	}
 
 }

@@ -1,0 +1,22 @@
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT01D',150);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT02D',200);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT03D',390);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT04D',150);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT05D',300);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT06D',150);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT07D',150);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT08D',150);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT09D',150);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT10D',1000);
+INSERT INTO `vehicle`(`type`,`plate`,`cylinder_capacity`)VALUES('MOTORCYCLE','MOT11D',100);
+
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(100,'2018-06-29 13:50:51','MOT01D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(101,'2018-06-29 13:50:51','MOT02D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(102,'2018-06-29 13:50:51','MOT03D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(103,'2018-06-29 13:50:51','MOT04D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(104,'2018-06-29 13:50:51','MOT05D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(105,'2018-06-29 13:50:51','MOT06D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(106,'2018-06-29 13:50:51','MOT07D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(107,'2018-06-29 13:50:51','MOT08D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`)VALUES(108,'2018-06-29 13:50:51','MOT09D');
+INSERT INTO `vehicle_control`(`id`,`entry_date`,`plate`, `departure_date`)VALUES(110,'2018-06-28 13:50:51','MOT11D', '2018-06-28 15:50:51');

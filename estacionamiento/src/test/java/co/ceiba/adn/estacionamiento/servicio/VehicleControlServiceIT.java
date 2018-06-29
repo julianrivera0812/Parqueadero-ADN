@@ -5,63 +5,78 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Date;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import co.ceiba.adn.estacionamiento.EstacionamientoApplication;
 import co.ceiba.adn.estacionamiento.JsonUtil;
-import co.ceiba.adn.estacionamiento.entity.Vehicle;
+import co.ceiba.adn.estacionamiento.entity.Motorcycle;
+import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
 import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
-import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = EstacionamientoApplication.class, webEnvironment = WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application-integrationtest.yml")
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
+@SqlGroup({ @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:beforeTestRun.sql"),
+		@Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:afterTestRun.sql") })
 public class VehicleControlServiceIT {
 
 	@Autowired
 	private MockMvc mvc;
 
 	@Autowired
-	private VehicleRepository vehicleRepository;
-
-	@Autowired
 	private VehicleControlRepository vehicleControlRepository;
-
-	private VehicleModel modelTest;
 
 	@Test
 	public void registerMotorcycle_whenHasSpace_thenResponseCode0() throws Exception {
 		// Arrange
-		modelTest = new MotorcycleModel("BTP12D", (short) 200);
+		VehicleModel modelTest = new MotorcycleModel("BTP12D", (short) 200);
 
 		// Act
 		mvc.perform(post("/api/vehicle/registerMotorcycleEntry").contentType(MediaType.APPLICATION_JSON)
 				.content(JsonUtil.toJson(modelTest))).andDo(print()).andExpect(jsonPath("$.code", is(0)));
 
 		// Assert
-		List<Vehicle> found = vehicleRepository.findAll();
-		assertThat(found).extracting(Vehicle::getPlate).contains("BTP12D");
+		List<VehicleControl> found = vehicleControlRepository.findByDepartureDateIsNullAndVehiclePlate("BTP12D");
+		assertThat(found).hasSize(1);
 	}
 
-	@After
-	public void resetDb() {
-		vehicleControlRepository.deleteAll();
-		vehicleRepository.deleteAll();
+	@Test
+	public void registerMotorcycle_whenNotSpace_thenResponseCode2() throws Exception {
+		// Arrange
+		VehicleModel modelTest = new MotorcycleModel("BTP12D", (short) 200);
+		fillParkingSpace();
+
+		// Act
+		mvc.perform(post("/api/vehicle/registerMotorcycleEntry").contentType(MediaType.APPLICATION_JSON)
+				.content(JsonUtil.toJson(modelTest))).andExpect(status().isOk()).andExpect(jsonPath("$.code", is(2)));
+
+		// Assert
+		List<VehicleControl> found = vehicleControlRepository.findByDepartureDateIsNullAndVehiclePlate("BTP12D");
+		assertThat(found).hasSize(0);
+	}
+
+	public void fillParkingSpace() {
+		vehicleControlRepository.save(new VehicleControl(new Motorcycle("MOT10D", (short) 1000), new Date()));
 	}
 }
