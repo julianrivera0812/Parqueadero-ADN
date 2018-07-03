@@ -1,6 +1,10 @@
 package co.ceiba.adn.estacionamiento.restcontroller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +14,7 @@ import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
 import co.ceiba.adn.estacionamiento.service.VehicleControlService;
+import co.ceiba.adn.estacionamiento.util.ResponseWSBuilder;
 
 @RestController
 @RequestMapping("/api/vehicle")
@@ -17,20 +22,39 @@ public class VehicleControlController {
 
 	private VehicleControlService vehicleControlService;
 
+	private ResponseWSBuilder responseWSUtil;
+
 	@Autowired
-	public VehicleControlController(VehicleControlService vehicleControlService) {
+	public VehicleControlController(VehicleControlService vehicleControlService, ResponseWSBuilder responseWSUtil) {
 		this.vehicleControlService = vehicleControlService;
+		this.responseWSUtil = responseWSUtil;
 	}
 
 	@PostMapping("/registerMotorcycleEntry")
-	public ResponseDTO registerMotorcycleEntry(@RequestBody(required = true) MotorcycleModel motorcycleModel) {
+	public ResponseEntity<ResponseDTO> registerMotorcycleEntry(
+			@Valid @RequestBody(required = true) MotorcycleModel motorcycleModel, Errors errors) {
 
-		return vehicleControlService.registerVehicleEntry(motorcycleModel);
+		try {
+			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleEntry(motorcycleModel), errors);
+
+		} catch (Exception e) {
+
+			return responseWSUtil.buildErrorResponse(e);
+		}
 	}
 
 	@PostMapping("/registerCarEntry")
-	public ResponseDTO registerCarEntry(@RequestBody(required = true) CarModel carModel) {
+	public ResponseEntity<ResponseDTO> registerCarEntry(@Valid @RequestBody(required = true) CarModel carModel,
+			Errors errors) {
 
-		return vehicleControlService.registerVehicleEntry(carModel);
+		try {
+
+			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleEntry(carModel), errors);
+
+		} catch (Exception e) {
+
+			return responseWSUtil.buildErrorResponse(e);
+		}
 	}
+
 }

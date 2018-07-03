@@ -1,4 +1,4 @@
-package co.ceiba.adn.estacionamiento.servicio;
+package co.ceiba.adn.estacionamiento.service;
 
 import static co.ceiba.adn.estacionamiento.builders.CarBuilder.aCar;
 import static co.ceiba.adn.estacionamiento.builders.MotorcycleBuilder.aMotorcycle;

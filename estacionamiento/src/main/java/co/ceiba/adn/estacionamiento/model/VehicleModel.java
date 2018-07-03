@@ -1,11 +1,13 @@
 package co.ceiba.adn.estacionamiento.model;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 public class VehicleModel {
 
-	protected String plate;
+	@NotBlank
+	@Size(min = 6, max = 6)
+	private String plate;
 
 	public String getPlate() {
 		return plate;
@@ -15,7 +17,7 @@ public class VehicleModel {
 		this.plate = plate;
 	}
 
-	public VehicleModel(@NotNull @NotEmpty String plate) {
+	public VehicleModel(String plate) {
 		super();
 		this.plate = plate;
 	}

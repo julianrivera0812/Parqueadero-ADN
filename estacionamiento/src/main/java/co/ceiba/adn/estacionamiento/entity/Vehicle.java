@@ -26,7 +26,7 @@ public abstract class Vehicle {
 	}
 
 	public enum VehicleTypeEnum {
-		CAR, MOTORCYCLE, VEHICLE;
+		CAR, MOTORCYCLE;
 	}
 
 	public abstract VehicleTypeEnum getType();
