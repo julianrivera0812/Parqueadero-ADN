@@ -20,7 +20,7 @@ public class Motorcycle extends Vehicle {
 		this.cylinderCapacity = cylinderCapacity;
 	}
 
-	public int getCylinderCapacity() {
+	public short getCylinderCapacity() {
 		return cylinderCapacity;
 	}
 

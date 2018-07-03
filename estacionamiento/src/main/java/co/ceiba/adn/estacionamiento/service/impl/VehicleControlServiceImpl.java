@@ -90,10 +90,25 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 	public boolean hasSpaceForVehicle(Vehicle vehicle) {
 
-		int maxValue = VehicleTypeEnum.MOTORCYCLE.equals(vehicle.getType()) ? MAX_AMOUNT_MOTORCYCLE
-				: MAX_AMOUNT_CAR;
+		int maxValue = getMaxAmountVehicle(vehicle.getType());
 
 		return countVehicleInParkingByType(vehicle.getClass()) < maxValue;
+	}
+
+	private int getMaxAmountVehicle(VehicleTypeEnum vehicleType) {
+		int maxAmount = 0;
+
+		switch (vehicleType) {
+		case CAR:
+			maxAmount = MAX_AMOUNT_CAR;
+			break;
+		case MOTORCYCLE:
+			maxAmount = MAX_AMOUNT_MOTORCYCLE;
+			break;
+		default:
+			throw new IllegalArgumentException("Tipo de vehiculo no valido");
+		}
+		return maxAmount;
 	}
 
 }

@@ -6,14 +6,18 @@ public class VehicleControlModel {
 
 	private Long id;
 
-	private VehicleModel vehicle;
+	private VehicleModel vehicleModel;
 
 	private Date entryDate;
 
 	private Date departureDate;
 
-	public VehicleControlModel() {
-		// JPA
+	public Date getDepartureDate() {
+		return departureDate;
+	}
+
+	public void setDepartureDate(Date departureDate) {
+		this.departureDate = departureDate;
 	}
 
 	public Date getEntryDate() {
@@ -24,14 +28,6 @@ public class VehicleControlModel {
 		this.entryDate = entryDate;
 	}
 
-	public Date getDepartureDate() {
-		return departureDate;
-	}
-
-	public void setDepartureDate(Date departureDate) {
-		this.departureDate = departureDate;
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -40,17 +36,17 @@ public class VehicleControlModel {
 		this.id = id;
 	}
 
-	public VehicleModel getVehicle() {
-		return vehicle;
+	public VehicleModel getVehicleModel() {
+		return vehicleModel;
 	}
 
-	public void setVehicle(VehicleModel vehicle) {
-		this.vehicle = vehicle;
+	public void setVehicleModel(VehicleModel vehicleModel) {
+		this.vehicleModel = vehicleModel;
 	}
 
-	public VehicleControlModel(VehicleModel vehicle, Date entryDate) {
+	public VehicleControlModel(VehicleModel vehicleModel, Date entryDate) {
 		super();
-		this.vehicle = vehicle;
+		this.vehicleModel = vehicleModel;
 		this.entryDate = entryDate;
 	}
 }
