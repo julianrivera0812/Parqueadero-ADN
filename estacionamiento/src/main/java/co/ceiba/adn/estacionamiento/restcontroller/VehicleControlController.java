@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
+import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.service.VehicleControlService;
 import co.ceiba.adn.estacionamiento.util.ResponseWSBuilder;
 
@@ -50,6 +51,20 @@ public class VehicleControlController {
 		try {
 
 			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleEntry(carModel), errors);
+
+		} catch (Exception e) {
+
+			return responseWSUtil.buildErrorResponse(e);
+		}
+	}
+
+	@PostMapping("/registerVehicleExit")
+	public ResponseEntity<ResponseDTO> registerVehicleExit(
+			@Valid @RequestBody(required = true) VehicleModel vehicleModel, Errors errors) {
+
+		try {
+
+			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleExit(vehicleModel), errors);
 
 		} catch (Exception e) {
 

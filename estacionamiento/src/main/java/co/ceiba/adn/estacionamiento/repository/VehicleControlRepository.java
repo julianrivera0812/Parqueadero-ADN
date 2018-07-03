@@ -21,4 +21,7 @@ public interface VehicleControlRepository extends JpaRepository<VehicleControl, 
 
 	@Query("FROM VehicleControl vc LEFT JOIN vc.vehicle v WHERE TYPE(v) = :type AND vc.departureDate IS NULL")
 	List<VehicleControl> findByDepartureDateIsNull(@Param("type") Class<? extends Vehicle> type);
+
+	@Query("FROM VehicleControl vc LEFT JOIN vc.vehicle v WHERE vc.departureDate IS NULL AND v.plate = :plate")
+	VehicleControl findOneByDepartureDateIsNullAndVehiclePlate(@Param("plate") String plate);
 }

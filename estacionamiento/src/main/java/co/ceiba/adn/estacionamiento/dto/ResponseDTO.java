@@ -25,4 +25,11 @@ public class ResponseDTO {
 	public void setMessage(String message) {
 		this.message = message;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ResponseDTO [code=").append(code).append(", message=").append(message).append("]");
+		return builder.toString();
+	}
 }

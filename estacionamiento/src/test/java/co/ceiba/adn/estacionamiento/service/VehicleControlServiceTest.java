@@ -5,7 +5,11 @@ import static co.ceiba.adn.estacionamiento.builders.MotorcycleBuilder.aMotorcycl
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -20,12 +24,12 @@ import co.ceiba.adn.estacionamiento.converter.VehicleConverter;
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.entity.Car;
 import co.ceiba.adn.estacionamiento.entity.Motorcycle;
+import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
-import co.ceiba.adn.estacionamiento.service.VehicleControlService;
 import co.ceiba.adn.estacionamiento.service.impl.VehicleControlServiceImpl;
 
 @RunWith(SpringRunner.class)
@@ -154,4 +158,162 @@ public class VehicleControlServiceTest {
 		// Assert
 		Assert.assertEquals(0, response.getCode());
 	}
+
+	@Test
+	public void calculatePaymentCarBy8Hours() {
+
+		// Arrange
+		int hours = 8;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, 0, hours, false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(8000), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentCarBy5Hours() {
+
+		// Arrange
+		int hours = 5;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, 0, hours, false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(5000), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentCarBy1DayAnd3Hours() {
+
+		// Arrange
+		int hours = 3;
+		int days = 1;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, days, hours, false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(11000), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentCarBy2DayAnd7Hours() {
+
+		// Arrange
+		int hours = 7;
+		int days = 2;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, days, hours, false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(23000), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentMotorcycleBy8Hours() {
+
+		// Arrange
+		int hours = 8;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.MOTORCYCLE, 0, hours, false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(4000), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentMotorcycleBy1DayAnd3Hours() {
+
+		// Arrange
+		int hours = 3;
+		int days = 1;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.MOTORCYCLE, days, hours,
+				false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(5500), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentMotorcycle650CCBy1DayAnd3Hours() {
+
+		// Arrange
+		int hours = 3;
+		int days = 1;
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.MOTORCYCLE, days, hours, true);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(7500), paymentValue);
+	}
+
+	@Test
+	public void calculateHoursLessThan9() throws ParseException {
+
+		// Arrange
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
+		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
+		Date departureDate = dateFormat.parse("2016-02-14 17:59:59");
+
+		// Act
+		int totalHours = vehicleControlService.calculateTotalHours(entryDate, departureDate);
+
+		// Assert
+		Assert.assertEquals(8, totalHours);
+	}
+
+	@Test
+	public void calculateHoursMoreThanOneDay() throws ParseException {
+
+		// Arrange
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
+		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
+		Date departureDate = dateFormat.parse("2016-02-15 18:00:00");
+
+		// Act
+		int totalHours = vehicleControlService.calculateTotalHours(entryDate, departureDate);
+
+		// Assert
+		Assert.assertEquals(32, totalHours);
+	}
+
+	@Test
+	public void calculatePaymentCar1Day3Hours() throws ParseException {
+
+		// Arrange
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
+		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
+		Date departureDate = dateFormat.parse("2016-02-15 13:00:00");
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(entryDate, departureDate, VehicleTypeEnum.CAR,
+				false);
+
+		// Assert
+		Assert.assertEquals(new BigDecimal(11000), paymentValue);
+	}
+
+	@Test
+	public void calculatePaymentMotorcycle650cc10Hours() throws ParseException {
+
+		// Arrange
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
+		Date entryDate = dateFormat.parse("2018-07-03 07:00:00");
+		Date departureDate = dateFormat.parse("2018-07-03 16:45:35");
+
+		// Act
+		BigDecimal paymentValue = vehicleControlService.calculatePayment(entryDate, departureDate,
+				VehicleTypeEnum.MOTORCYCLE, true);
+		// Assert
+		Assert.assertEquals(new BigDecimal(6000), paymentValue);
+	}
+
 }
