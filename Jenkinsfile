@@ -17,9 +17,14 @@ pipeline {
 	 }
 	 //Aquí comienzan los “items” del Pipeline
 	 stages{
-		 stage('Compile') {
+		 stage('Checkout') {
 			steps{
-				echo "------------>Compile<------------"			
+				echo "------------>Checkout<------------"
+				checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+				doGenerateSubmoduleConfigurations: false, extensions: [], gitTool:
+				'Git_Centos', submoduleCfg: [], userRemoteConfigs: [[credentialsId:
+				'GitHub_julianrivera0812', url:
+				'https://github.com/julianrivera0812/Parqueadero-ADN']]])				
 				sh 'gradle --b ./build.gradle compileJava'
 			}
 		 }
@@ -32,7 +37,6 @@ pipeline {
 		 stage('Integration Tests') {
 			 steps {
 				echo "------------>Integration Tests<------------"
-				sh 'gradle --b ./build.gradle integrationTest'
 			 }
 		 }
 		 stage('Static Code Analysis') {
@@ -57,7 +61,7 @@ pipeline {
 		 }
 		 success {
 			echo 'This will run only if successful'
-			junit '**/jacoco/test-results/test/*.xml'
+			junit '**/jacoco/test-results/*.xml'
 		 }
 		 failure {
 			echo 'This will run only if failed'
