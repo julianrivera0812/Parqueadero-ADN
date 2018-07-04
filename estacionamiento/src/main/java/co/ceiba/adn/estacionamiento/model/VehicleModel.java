@@ -17,7 +17,7 @@ public class VehicleModel {
 		this.plate = plate;
 	}
 
-	public VehicleModel(String plate) {
+	protected VehicleModel(String plate) {
 		super();
 		this.plate = plate;
 	}

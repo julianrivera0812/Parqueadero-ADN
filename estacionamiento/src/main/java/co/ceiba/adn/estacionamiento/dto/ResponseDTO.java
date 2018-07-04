@@ -26,10 +26,4 @@ public class ResponseDTO {
 		this.message = message;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ResponseDTO [code=").append(code).append(", message=").append(message).append("]");
-		return builder.toString();
-	}
 }

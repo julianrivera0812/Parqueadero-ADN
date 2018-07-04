@@ -19,57 +19,35 @@ import co.ceiba.adn.estacionamiento.util.ResponseWSBuilder;
 
 @RestController
 @RequestMapping("/api/vehicle")
-public class VehicleControlController {
+public class VehicleControlController extends BaseRestController {
 
 	private VehicleControlService vehicleControlService;
 
-	private ResponseWSBuilder responseWSUtil;
-
 	@Autowired
-	public VehicleControlController(VehicleControlService vehicleControlService, ResponseWSBuilder responseWSUtil) {
+	public VehicleControlController(VehicleControlService vehicleControlService, ResponseWSBuilder responseWSBuilder) {
+		super(responseWSBuilder);
 		this.vehicleControlService = vehicleControlService;
-		this.responseWSUtil = responseWSUtil;
 	}
 
 	@PostMapping("/registerMotorcycleEntry")
 	public ResponseEntity<ResponseDTO> registerMotorcycleEntry(
 			@Valid @RequestBody(required = true) MotorcycleModel motorcycleModel, Errors errors) {
 
-		try {
-			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleEntry(motorcycleModel), errors);
-
-		} catch (Exception e) {
-
-			return responseWSUtil.buildErrorResponse(e);
-		}
+		return callService(() -> vehicleControlService.registerVehicleEntry(motorcycleModel), errors);
 	}
 
 	@PostMapping("/registerCarEntry")
 	public ResponseEntity<ResponseDTO> registerCarEntry(@Valid @RequestBody(required = true) CarModel carModel,
 			Errors errors) {
 
-		try {
-
-			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleEntry(carModel), errors);
-
-		} catch (Exception e) {
-
-			return responseWSUtil.buildErrorResponse(e);
-		}
+		return callService(() -> vehicleControlService.registerVehicleEntry(carModel), errors);
 	}
 
 	@PostMapping("/registerVehicleExit")
 	public ResponseEntity<ResponseDTO> registerVehicleExit(
 			@Valid @RequestBody(required = true) VehicleModel vehicleModel, Errors errors) {
 
-		try {
-
-			return responseWSUtil.buildResponse(vehicleControlService.registerVehicleExit(vehicleModel), errors);
-
-		} catch (Exception e) {
-
-			return responseWSUtil.buildErrorResponse(e);
-		}
+		return callService(() -> vehicleControlService.registerVehicleExit(vehicleModel), errors);
 	}
 
 }

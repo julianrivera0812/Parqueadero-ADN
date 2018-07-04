@@ -2,7 +2,9 @@ package co.ceiba.adn.estacionamiento.service;
 
 import static co.ceiba.adn.estacionamiento.builders.CarBuilder.aCar;
 import static co.ceiba.adn.estacionamiento.builders.MotorcycleBuilder.aMotorcycle;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -28,6 +30,7 @@ import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
+import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
 import co.ceiba.adn.estacionamiento.service.impl.VehicleControlServiceImpl;
@@ -48,6 +51,8 @@ public class VehicleControlServiceTest {
 	@InjectMocks
 	private VehicleControlService vehicleControlService = new VehicleControlServiceImpl(vehicleRepository,
 			vehicleControlRepository, vehicleConverter);
+
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
 
 	@Test
 	public void isEnabledDayPlateStartsA() {
@@ -166,7 +171,8 @@ public class VehicleControlServiceTest {
 		int hours = 8;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, 0, hours, false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.CAR, 0, hours,
+				false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(8000), paymentValue);
@@ -179,7 +185,8 @@ public class VehicleControlServiceTest {
 		int hours = 5;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, 0, hours, false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.CAR, 0, hours,
+				false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(5000), paymentValue);
@@ -193,7 +200,8 @@ public class VehicleControlServiceTest {
 		int days = 1;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, days, hours, false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.CAR, days, hours,
+				false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(11000), paymentValue);
@@ -207,7 +215,8 @@ public class VehicleControlServiceTest {
 		int days = 2;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.CAR, days, hours, false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.CAR, days, hours,
+				false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(23000), paymentValue);
@@ -220,7 +229,8 @@ public class VehicleControlServiceTest {
 		int hours = 8;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.MOTORCYCLE, 0, hours, false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.MOTORCYCLE, 0,
+				hours, false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(4000), paymentValue);
@@ -234,8 +244,8 @@ public class VehicleControlServiceTest {
 		int days = 1;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.MOTORCYCLE, days, hours,
-				false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.MOTORCYCLE, days,
+				hours, false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(5500), paymentValue);
@@ -249,7 +259,8 @@ public class VehicleControlServiceTest {
 		int days = 1;
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(VehicleTypeEnum.MOTORCYCLE, days, hours, true);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByVehicleType(VehicleTypeEnum.MOTORCYCLE, days,
+				hours, true);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(7500), paymentValue);
@@ -259,7 +270,6 @@ public class VehicleControlServiceTest {
 	public void calculateHoursLessThan9() throws ParseException {
 
 		// Arrange
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
 		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
 		Date departureDate = dateFormat.parse("2016-02-14 17:59:59");
 
@@ -274,7 +284,6 @@ public class VehicleControlServiceTest {
 	public void calculateHoursMoreThanOneDay() throws ParseException {
 
 		// Arrange
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
 		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
 		Date departureDate = dateFormat.parse("2016-02-15 18:00:00");
 
@@ -289,13 +298,12 @@ public class VehicleControlServiceTest {
 	public void calculatePaymentCar1Day3Hours() throws ParseException {
 
 		// Arrange
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
 		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
 		Date departureDate = dateFormat.parse("2016-02-15 13:00:00");
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(entryDate, departureDate, VehicleTypeEnum.CAR,
-				false);
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByDates(entryDate, departureDate,
+				VehicleTypeEnum.CAR, false);
 
 		// Assert
 		Assert.assertEquals(new BigDecimal(11000), paymentValue);
@@ -305,15 +313,33 @@ public class VehicleControlServiceTest {
 	public void calculatePaymentMotorcycle650cc10Hours() throws ParseException {
 
 		// Arrange
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m:s");
 		Date entryDate = dateFormat.parse("2018-07-03 07:00:00");
 		Date departureDate = dateFormat.parse("2018-07-03 16:45:35");
 
 		// Act
-		BigDecimal paymentValue = vehicleControlService.calculatePayment(entryDate, departureDate,
+		BigDecimal paymentValue = vehicleControlService.calculatePaymentByDates(entryDate, departureDate,
 				VehicleTypeEnum.MOTORCYCLE, true);
 		// Assert
 		Assert.assertEquals(new BigDecimal(6000), paymentValue);
+	}
+
+	@Test
+	public void registerVehicleExitNotFound() {
+
+		// Arrange
+		VehicleModel vehicleModel = aMotorcycle().build();
+		when(vehicleControlRepository.findOneByDepartureDateIsNullAndVehiclePlate(anyString())).thenReturn(null);
+
+		try {
+			// Act
+			vehicleControlService.registerVehicleExit(vehicleModel);
+			fail();
+
+		} catch (Exception e) {
+			// Assert
+			Assert.assertEquals("No existe registro de ingreso del vehiculo", e.getMessage());
+		}
+
 	}
 
 }

@@ -1,5 +1,6 @@
 package co.ceiba.adn.estacionamiento.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -33,6 +34,9 @@ public class VehicleControl {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "departure_date")
 	private Date departureDate;
+
+	@Column(name = "payment_value")
+	private BigDecimal paymentValue;
 
 	public VehicleControl() {
 		// JPA
@@ -74,5 +78,13 @@ public class VehicleControl {
 		super();
 		this.vehicle = vehicle;
 		this.entryDate = entryDate;
+	}
+
+	public BigDecimal getPaymentValue() {
+		return paymentValue;
+	}
+
+	public void setPaymentValue(BigDecimal paymentValue) {
+		this.paymentValue = paymentValue;
 	}
 }

@@ -1,5 +1,7 @@
 package co.ceiba.adn.estacionamiento.service;
 
+import static co.ceiba.adn.estacionamiento.builders.CarBuilder.aCar;
+import static co.ceiba.adn.estacionamiento.builders.MotorcycleBuilder.aMotorcycle;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -7,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +28,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import co.ceiba.adn.estacionamiento.EstacionamientoApplication;
 import co.ceiba.adn.estacionamiento.JsonUtil;
@@ -32,8 +37,6 @@ import co.ceiba.adn.estacionamiento.entity.Motorcycle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
-import co.ceiba.adn.estacionamiento.model.CarModel;
-import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
 import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 
@@ -54,59 +57,70 @@ public class VehicleControlServiceIT {
 	@Test
 	public void registerMotorcycle_whenHasSpace_thenResponseCode0() throws Exception {
 		// Arrange
-		VehicleModel modelTest = new MotorcycleModel("BTP12D", (short) 200);
+		VehicleModel modelTest = aMotorcycle().withPlate("BTP12D").withCylinderCapacity((short) 200).build();
 
 		// Act
-		mvc.perform(post("/api/vehicle/registerMotorcycleEntry").contentType(MediaType.APPLICATION_JSON)
-				.content(JsonUtil.toJson(modelTest))).andDo(print()).andExpect(jsonPath("$.code", is(0)));
+		ResultActions resultWS = mvc.perform(post("/api/vehicle/registerMotorcycleEntry")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
 
 		// Assert
-		List<VehicleControl> found = vehicleControlRepository.findByDepartureDateIsNullAndVehiclePlate("BTP12D");
+		resultWS.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(0)));
+		List<VehicleControl> found = vehicleControlRepository
+				.findByDepartureDateIsNullAndVehiclePlate(modelTest.getPlate());
 		assertThat(found).hasSize(1);
 	}
 
 	@Test
 	public void registerMotorcycle_whenNotSpace_thenResponseCode2() throws Exception {
+
 		// Arrange
-		VehicleModel modelTest = new MotorcycleModel("BTP12D", (short) 200);
+		VehicleModel modelTest = aMotorcycle().withPlate("BTP12D").withCylinderCapacity((short) 200).build();
 		fillParkingSpace(VehicleTypeEnum.MOTORCYCLE);
 
 		// Act
-		mvc.perform(post("/api/vehicle/registerMotorcycleEntry").contentType(MediaType.APPLICATION_JSON)
-				.content(JsonUtil.toJson(modelTest))).andExpect(status().isOk()).andExpect(jsonPath("$.code", is(2)));
+		ResultActions resultWS = mvc.perform(post("/api/vehicle/registerMotorcycleEntry")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
 
 		// Assert
-		List<VehicleControl> found = vehicleControlRepository.findByDepartureDateIsNullAndVehiclePlate("BTP12D");
+		resultWS.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(2)));
+		List<VehicleControl> found = vehicleControlRepository
+				.findByDepartureDateIsNullAndVehiclePlate(modelTest.getPlate());
 		assertThat(found).hasSize(0);
 	}
 
 	@Test
 	public void registerCar_whenHasSpace_thenResponseCode0() throws Exception {
+
 		// Arrange
-		VehicleModel modelTest = new CarModel("IUT123");
+		VehicleModel modelTest = aCar().withPlate("IUT123").build();
 
 		// Act
-		mvc.perform(post("/api/vehicle/registerCarEntry").contentType(MediaType.APPLICATION_JSON)
-				.content(JsonUtil.toJson(modelTest))).andDo(print()).andExpect(jsonPath("$.code", is(0)));
+		ResultActions resultWS = mvc.perform(post("/api/vehicle/registerCarEntry")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
 
 		// Assert
-		List<VehicleControl> found = vehicleControlRepository.findByDepartureDateIsNullAndVehiclePlate("IUT123");
+		resultWS.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(0)));
+		List<VehicleControl> found = vehicleControlRepository
+				.findByDepartureDateIsNullAndVehiclePlate(modelTest.getPlate());
 		assertThat(found).hasSize(1);
 	}
 
 	@Test
 	public void registerCar_whenNotSpace_thenResponseCode2() throws Exception {
+
 		// Arrange
-		VehicleModel modelTest = new CarModel("IUT123");
+		VehicleModel modelTest = aCar().withPlate("IUT123").build();
 
 		fillParkingSpace(VehicleTypeEnum.CAR);
 
 		// Act
-		mvc.perform(post("/api/vehicle/registerCarEntry").contentType(MediaType.APPLICATION_JSON)
-				.content(JsonUtil.toJson(modelTest))).andExpect(status().isOk()).andExpect(jsonPath("$.code", is(2)));
+		ResultActions resultWS = mvc.perform(post("/api/vehicle/registerCarEntry")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
 
 		// Assert
-		List<VehicleControl> found = vehicleControlRepository.findByDepartureDateIsNullAndVehiclePlate("IUT123");
+		resultWS.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(2)));
+		List<VehicleControl> found = vehicleControlRepository
+				.findByDepartureDateIsNullAndVehiclePlate(modelTest.getPlate());
 		assertThat(found).hasSize(0);
 	}
 
@@ -126,5 +140,83 @@ public class VehicleControlServiceIT {
 		}
 
 		vehicleControlRepository.save(new VehicleControl(vehicle, new Date()));
+	}
+
+	@Test
+	public void registerMotorcycleExit_whenHasEntry_thenResponseCode0AndPaymentValue() throws Exception {
+
+		// Arrange
+		VehicleModel modelTest = aMotorcycle().withPlate("BTP12D").withCylinderCapacity((short) 650).build();
+		List<BigDecimal> paymentValues = new ArrayList<>();
+		paymentValues.add(null);
+		paymentValues.add(new BigDecimal("2500.00"));
+
+		// Act
+		ResultActions resultEntry = mvc.perform(post("/api/vehicle/registerMotorcycleEntry")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
+
+		ResultActions resultExit = mvc.perform(post("/api/vehicle/registerVehicleExit")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
+
+		// Assert
+		resultEntry.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(0)));
+		resultExit.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(0)))
+				.andExpect(jsonPath("$.paymentValue", is(2500)));
+
+		List<VehicleControl> found = vehicleControlRepository.findAll();
+		assertThat(found).extracting(VehicleControl::getPaymentValue).containsOnlyElementsOf(paymentValues);
+	}
+
+	@Test
+	public void registerMotorcycleExit_whenNoSendPlate_thenBadRequestResponseCode3() throws Exception {
+
+		// Arrange
+		VehicleModel modelTest = aMotorcycle().withPlate(null).build();
+
+		// Act
+		ResultActions resultExit = mvc.perform(post("/api/vehicle/registerVehicleExit")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
+
+		// Assert
+		resultExit.andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code", is(3)));
+	}
+
+	@Test
+	public void registerCarExit_whenHasEntry_thenResponseCode0AndPaymentValue() throws Exception {
+
+		// Arrange
+		VehicleModel modelTest = aCar().withPlate("IUT123").build();
+		List<BigDecimal> paymentValues = new ArrayList<>();
+		paymentValues.add(null);
+		paymentValues.add(new BigDecimal("1000.00"));
+
+		// Act
+		ResultActions resultEntry = mvc.perform(post("/api/vehicle/registerCarEntry")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
+
+		ResultActions resultExit = mvc.perform(post("/api/vehicle/registerVehicleExit")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
+
+		// Assert
+		resultEntry.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(0)));
+		resultExit.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(0)))
+				.andExpect(jsonPath("$.paymentValue", is(1000)));
+
+		List<VehicleControl> found = vehicleControlRepository.findAll();
+		assertThat(found).extracting(VehicleControl::getPaymentValue).containsOnlyElementsOf(paymentValues);
+	}
+
+	@Test
+	public void registerCarExit_whenNoSendPlate_thenBadRequestResponseCode3() throws Exception {
+
+		// Arrange
+		VehicleModel modelTest = aCar().withPlate(null).build();
+
+		// Act
+		ResultActions resultExit = mvc.perform(post("/api/vehicle/registerVehicleExit")
+				.contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
+
+		// Assert
+		resultExit.andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code", is(3)));
 	}
 }

@@ -14,11 +14,4 @@ public class RegisterExitOutDTO extends ResponseDTO {
 		this.paymentValue = paymentValue;
 	}
 
-	public RegisterExitOutDTO(BigDecimal paymentValue) {
-		super();
-		this.paymentValue = paymentValue;
-	}
-
-	public RegisterExitOutDTO() {
-	}
 }
