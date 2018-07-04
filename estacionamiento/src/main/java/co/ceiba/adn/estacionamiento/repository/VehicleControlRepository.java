@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import co.ceiba.adn.estacionamiento.dto.VehicleControlDTO;
 import co.ceiba.adn.estacionamiento.entity.Vehicle;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 
@@ -24,4 +25,7 @@ public interface VehicleControlRepository extends JpaRepository<VehicleControl, 
 
 	@Query("FROM VehicleControl vc LEFT JOIN vc.vehicle v WHERE vc.departureDate IS NULL AND v.plate = :plate")
 	VehicleControl findOneByDepartureDateIsNullAndVehiclePlate(@Param("plate") String plate);
+
+	@Query(nativeQuery = true, name = "VehicleControl.findNativeByDepartureDateIsNull")
+	List<VehicleControlDTO> findNativeByDepartureDateIsNull();
 }

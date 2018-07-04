@@ -39,4 +39,20 @@ public abstract class BaseRestController {
 		return responseEntity;
 	}
 
+	protected ResponseEntity<ResponseDTO> callService(ServiceCaller serviceCaller) {
+
+		ResponseEntity<ResponseDTO> responseEntity = null;
+
+		try {
+
+			responseEntity = new ResponseEntity<>(serviceCaller.callService(), HttpStatus.OK);
+
+		} catch (Exception e) {
+
+			responseEntity = responseWSBuilder.buildErrorResponse(e);
+		}
+
+		return responseEntity;
+	}
+
 }

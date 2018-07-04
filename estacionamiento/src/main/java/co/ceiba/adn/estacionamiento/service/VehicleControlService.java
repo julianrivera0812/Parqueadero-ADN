@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.validation.Valid;
 
+import co.ceiba.adn.estacionamiento.dto.GetVehicleInParkingOutDTO;
 import co.ceiba.adn.estacionamiento.dto.RegisterExitOutDTO;
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.entity.Vehicle;
@@ -30,5 +31,7 @@ public interface VehicleControlService {
 			boolean hasIncrement);
 
 	public RegisterExitOutDTO registerVehicleExit(VehicleModel vehicleModel);
+
+	public GetVehicleInParkingOutDTO getVehicleInParking();
 
 }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.ConstructorResult;
+import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -11,12 +13,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import co.ceiba.adn.estacionamiento.dto.VehicleControlDTO;
+
 @Entity
 @Table(name = "vehicle_control")
+@NamedNativeQuery(name = "VehicleControl.findNativeByDepartureDateIsNull", resultClass = VehicleControlDTO.class, resultSetMapping = "VehicleControl.findNativeByDepartureDateIsNull", query = "SELECT v.plate, v.type, vc.entry_date FROM vehicle_control vc LEFT JOIN vehicle v ON v.plate=vc.plate WHERE vc.departure_date IS NULL")
+@SqlResultSetMapping(name = "VehicleControl.findNativeByDepartureDateIsNull", classes = {
+		@ConstructorResult(targetClass = VehicleControlDTO.class, columns = {
+				@ColumnResult(name = "plate", type = String.class), @ColumnResult(name = "type", type = String.class),
+				@ColumnResult(name = "entry_date", type = Date.class) }) })
 public class VehicleControl {
 
 	@Id

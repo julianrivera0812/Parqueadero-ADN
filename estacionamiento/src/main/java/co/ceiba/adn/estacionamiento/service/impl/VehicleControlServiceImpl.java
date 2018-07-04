@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import co.ceiba.adn.estacionamiento.constant.RateConstants;
 import co.ceiba.adn.estacionamiento.constant.VehicleLimitConstants;
 import co.ceiba.adn.estacionamiento.converter.VehicleConverter;
+import co.ceiba.adn.estacionamiento.dto.GetVehicleInParkingOutDTO;
 import co.ceiba.adn.estacionamiento.dto.RegisterExitOutDTO;
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.entity.Motorcycle;
@@ -75,30 +76,30 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 	}
 
 	public RegisterExitOutDTO registerVehicleExit(VehicleModel vehicleModel) {
-	
+
 		Date currentDate = new Date();
-	
+
 		RegisterExitOutDTO response = new RegisterExitOutDTO();
-	
+
 		VehicleControl vehicleControl = vehicleControlRepository
 				.findOneByDepartureDateIsNullAndVehiclePlate(vehicleModel.getPlate());
-	
+
 		if (vehicleControl != null) {
-	
+
 			boolean hasIncrement = hasIncrement(vehicleControl.getVehicle());
-	
+
 			BigDecimal paymentValue = calculatePaymentByDates(vehicleControl.getEntryDate(), currentDate,
 					vehicleControl.getVehicle().getType(), hasIncrement);
-	
+
 			vehicleControl.setDepartureDate(currentDate);
 			vehicleControl.setPaymentValue(paymentValue);
 			vehicleControlRepository.save(vehicleControl);
-	
+
 			response.setPaymentValue(paymentValue);
 		} else {
 			throw new IllegalArgumentException("No existe registro de ingreso del vehiculo");
 		}
-	
+
 		return response;
 	}
 
@@ -180,7 +181,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 	private int getMaxAmountVehicle(VehicleTypeEnum vehicleType) {
 		int maxAmount = 0;
-	
+
 		switch (vehicleType) {
 		case CAR:
 			maxAmount = VehicleLimitConstants.MAX_AMOUNT_CAR;
@@ -195,17 +196,22 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 	}
 
 	private BigDecimal calculateBasePayment(int days, int hours, BigDecimal dayValue, BigDecimal hourValue) {
-	
+
 		BigDecimal daysPayment = new BigDecimal(days).multiply(dayValue);
-	
+
 		BigDecimal hoursPayment = new BigDecimal(hours).multiply(hourValue);
-	
+
 		return daysPayment.add(hoursPayment);
 	}
 
 	private boolean hasIncrement(Vehicle vehicle) {
 		return VehicleTypeEnum.MOTORCYCLE.equals(vehicle.getType())
 				&& ((Motorcycle) vehicle).getCylinderCapacity() > VehicleLimitConstants.LIMIT_CC_FOR_INCREMENT;
+	}
+
+	public GetVehicleInParkingOutDTO getVehicleInParking() {
+
+		return new GetVehicleInParkingOutDTO(vehicleControlRepository.findNativeByDepartureDateIsNull());
 	}
 
 }
