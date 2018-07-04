@@ -31,14 +31,30 @@ dependencies {
 	runtime('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.mockito:mockito-all:1.10.19')
+	testCompile('com.h2database:h2')
 }
 
 test {
+	useJUnit {
+       exclude '**/*IT.*'
+       exclude '**/*FT.*'
+    }
 	jacoco {
 		append = false
 		destinationFile = file("jacoco/jacocoTest.exec")
 	}
-	reports.junitXml.destination =  file("jacoco/test-results")
+	reports.junitXml.destination =  file("jacoco/test-results/test")
 }
 
-jacocoTestReport.dependsOn(test)
+task integrationTest(type: Test, description: 'Runs the integration tests', group: 'Verification') {
+   useJUnit {
+       include '**/*IT.*'
+   }
+   jacoco {
+		append = false
+		destinationFile = file("jacoco/jacocoIntegrationTest.exec")
+	}
+	reports.junitXml.destination =  file("jacoco/test-results/integrationTest")
+}
+
+jacocoTestReport.dependsOn(test, integrationTest)
