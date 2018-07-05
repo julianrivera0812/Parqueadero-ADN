@@ -29,7 +29,7 @@ public class Motorcycle extends Vehicle {
 	}
 
 	@Override
-	public VehicleTypeEnum getType() {
+	public VehicleTypeEnum getTypeEnum() {
 		return VehicleTypeEnum.MOTORCYCLE;
 	}
 

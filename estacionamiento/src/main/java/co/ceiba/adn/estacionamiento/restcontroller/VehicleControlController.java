@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
@@ -52,9 +53,10 @@ public class VehicleControlController extends BaseRestController {
 	}
 
 	@GetMapping("/getVehicleInParking")
-	public ResponseEntity<ResponseDTO> getVehicleInParking() {
+	public ResponseEntity<ResponseDTO> getVehicleInParking(@RequestParam(name = "page", required = false) Integer page,
+			@RequestParam(name = "size", required = false) Integer size) {
 
-		return callService(() -> vehicleControlService.getVehicleInParking());
+		return callService(() -> vehicleControlService.getVehicleInParking(page, size));
 	}
 
 }

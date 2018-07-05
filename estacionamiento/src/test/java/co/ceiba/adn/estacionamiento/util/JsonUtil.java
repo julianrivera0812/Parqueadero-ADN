@@ -1,4 +1,4 @@
-package co.ceiba.adn.estacionamiento;
+package co.ceiba.adn.estacionamiento.util;
 
 import java.io.IOException;
 

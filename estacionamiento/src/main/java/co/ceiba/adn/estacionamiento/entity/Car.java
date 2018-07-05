@@ -16,7 +16,7 @@ public class Car extends Vehicle {
 	}
 
 	@Override
-	public VehicleTypeEnum getType() {
+	public VehicleTypeEnum getTypeEnum() {
 		return VehicleTypeEnum.CAR;
 	}
 

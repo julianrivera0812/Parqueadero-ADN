@@ -4,18 +4,20 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import co.ceiba.adn.estacionamiento.constant.RateConstants;
 import co.ceiba.adn.estacionamiento.constant.VehicleLimitConstants;
 import co.ceiba.adn.estacionamiento.converter.VehicleConverter;
-import co.ceiba.adn.estacionamiento.dto.GetVehicleInParkingOutDTO;
+import co.ceiba.adn.estacionamiento.dto.GetVehicleInParkingPaginatedDTO;
 import co.ceiba.adn.estacionamiento.dto.RegisterExitOutDTO;
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
 import co.ceiba.adn.estacionamiento.entity.Motorcycle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
+import co.ceiba.adn.estacionamiento.enumeration.ResponseCodeEnum;
 import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
@@ -55,13 +57,13 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 			} else {
 
-				response.setCode(1);
-				response.setMessage("no puede ingresar porque no está en un dia hábil");
+				response.setCode(ResponseCodeEnum.NOT_ENTRY_BY_DAY.getCode());
+				response.setMessage(ResponseCodeEnum.NOT_ENTRY_BY_DAY.getMessage());
 			}
 
 		} else {
-			response.setCode(2);
-			response.setMessage("no puede ingresar porque no hay cupo disponible");
+			response.setCode(ResponseCodeEnum.WITHOUT_SPACE.getCode());
+			response.setMessage(ResponseCodeEnum.WITHOUT_SPACE.getMessage());
 		}
 
 		return response;
@@ -89,7 +91,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 			boolean hasIncrement = hasIncrement(vehicleControl.getVehicle());
 
 			BigDecimal paymentValue = calculatePaymentByDates(vehicleControl.getEntryDate(), currentDate,
-					vehicleControl.getVehicle().getType(), hasIncrement);
+					vehicleControl.getVehicle().getTypeEnum(), hasIncrement);
 
 			vehicleControl.setDepartureDate(currentDate);
 			vehicleControl.setPaymentValue(paymentValue);
@@ -120,7 +122,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 	public boolean hasSpaceForVehicle(Vehicle vehicle) {
 
-		int maxValue = getMaxAmountVehicle(vehicle.getType());
+		int maxValue = getMaxAmountVehicle(vehicle.getTypeEnum());
 
 		return countVehicleInParkingByType(vehicle.getClass()) < maxValue;
 	}
@@ -205,13 +207,21 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 	}
 
 	private boolean hasIncrement(Vehicle vehicle) {
-		return VehicleTypeEnum.MOTORCYCLE.equals(vehicle.getType())
+		return VehicleTypeEnum.MOTORCYCLE.equals(vehicle.getTypeEnum())
 				&& ((Motorcycle) vehicle).getCylinderCapacity() > VehicleLimitConstants.LIMIT_CC_FOR_INCREMENT;
 	}
 
-	public GetVehicleInParkingOutDTO getVehicleInParking() {
+	public GetVehicleInParkingPaginatedDTO getVehicleInParking(Integer page, Integer size) {
 
-		return new GetVehicleInParkingOutDTO(vehicleControlRepository.findNativeByDepartureDateIsNull());
+		GetVehicleInParkingPaginatedDTO response = new GetVehicleInParkingPaginatedDTO();
+
+		if (page == null || size == null || page < 0 || size < 0) {
+			throw new IllegalArgumentException("Parámetros de paginación incorrectos");
+		} else {
+			response.setPage(vehicleControlRepository.findByDepartureDateIsNull(PageRequest.of(page, size)));
+		}
+
+		return response;
 	}
 
 }

@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 
 import co.ceiba.adn.estacionamiento.dto.ResponseDTO;
-import co.ceiba.adn.estacionamiento.service.util.ServiceCaller;
+import co.ceiba.adn.estacionamiento.service.ServiceCaller;
 import co.ceiba.adn.estacionamiento.util.ResponseWSBuilder;
 
 public abstract class BaseRestController {

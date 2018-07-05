@@ -17,6 +17,9 @@ public abstract class Vehicle {
 	@Column(name = "plate", length = 6)
 	protected String plate;
 
+	@Column(name = "TYPE", insertable = false, updatable = false)
+	private String type;
+
 	public String getPlate() {
 		return plate;
 	}
@@ -29,5 +32,14 @@ public abstract class Vehicle {
 		CAR, MOTORCYCLE;
 	}
 
-	public abstract VehicleTypeEnum getType();
+	public abstract VehicleTypeEnum getTypeEnum();
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
+	}
+
 }

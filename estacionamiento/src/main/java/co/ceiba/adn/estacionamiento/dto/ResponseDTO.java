@@ -1,5 +1,7 @@
 package co.ceiba.adn.estacionamiento.dto;
 
+import co.ceiba.adn.estacionamiento.enumeration.ResponseCodeEnum;
+
 public class ResponseDTO {
 
 	private int code;
@@ -7,7 +9,7 @@ public class ResponseDTO {
 	private String message;
 
 	public ResponseDTO() {
-		this.code = 0;
+		this.code = ResponseCodeEnum.SUCCESS.getCode();
 	}
 
 	public int getCode() {
