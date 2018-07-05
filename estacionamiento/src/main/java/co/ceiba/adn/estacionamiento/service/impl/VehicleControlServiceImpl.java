@@ -49,6 +49,11 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 		ResponseDTO response = new ResponseDTO();
 
+		if (vehicleControlRepository.existsByDepartureDateIsNullAndVehiclePlate(vehicle.getPlate())) {
+
+			throw new IllegalArgumentException("Ya existe registro de ingreso del vehiculo");
+		}
+
 		if (hasSpaceForVehicle(vehicle)) {
 
 			if (isEnableDayByPlate(vehicleModel.getPlate(), currentDate)) {

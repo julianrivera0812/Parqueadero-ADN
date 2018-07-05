@@ -127,6 +127,24 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		assertThat(found).hasSize(0);
 	}
 
+	@Test
+	public void registerCarEntry_whenExistsEntry_thenBadRequestResponseCode3() throws Exception {
+
+		// Arrange
+		CarModel modelTest = aCar().withPlate("CAR001").build();
+
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc);
+	}
+	
+	@Test
+	public void registerMotorcycleEntry_whenExistsEntry_thenBadRequestResponseCode3() throws Exception {
+
+		// Arrange
+		CarModel modelTest = aCar().withPlate("MOT01D").build();
+
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc);
+	}
+
 	private void fillParkingSpace(VehicleTypeEnum vehicleType) {
 
 		Vehicle vehicle = null;

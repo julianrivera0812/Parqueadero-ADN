@@ -27,4 +27,6 @@ public interface VehicleControlRepository extends JpaRepository<VehicleControl, 
 
 	@Query("SELECT NEW co.ceiba.adn.estacionamiento.dto.VehicleControlDTO(v.plate, v.type, vc.entryDate) FROM VehicleControl vc LEFT JOIN vc.vehicle v WHERE vc.departureDate IS NULL")
 	Page<VehicleControlDTO> findByDepartureDateIsNull(Pageable pageable);
+
+	boolean existsByDepartureDateIsNullAndVehiclePlate(String plate);
 }

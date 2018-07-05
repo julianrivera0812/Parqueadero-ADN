@@ -28,6 +28,7 @@ import co.ceiba.adn.estacionamiento.entity.Car;
 import co.ceiba.adn.estacionamiento.entity.Motorcycle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
+import co.ceiba.adn.estacionamiento.enumeration.ResponseCodeEnum;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
 import co.ceiba.adn.estacionamiento.model.VehicleModel;
@@ -118,7 +119,7 @@ public class VehicleControlServiceTest {
 		ResponseDTO response = vehicleControlService.registerVehicleEntry(motorcycleModel);
 
 		// Assert
-		Assert.assertEquals(2, response.getCode());
+		Assert.assertEquals(ResponseCodeEnum.WITHOUT_SPACE.getCode(), response.getCode());
 	}
 
 	@Test
@@ -139,7 +140,7 @@ public class VehicleControlServiceTest {
 		ResponseDTO response = vehicleControlService.registerVehicleEntry(carModel);
 
 		// Assert
-		Assert.assertEquals(2, response.getCode());
+		Assert.assertEquals(ResponseCodeEnum.WITHOUT_SPACE.getCode(), response.getCode());
 	}
 
 	@Test
@@ -161,7 +162,7 @@ public class VehicleControlServiceTest {
 		ResponseDTO response = vehicleControlService.registerVehicleEntry(motorcycleModel);
 
 		// Assert
-		Assert.assertEquals(0, response.getCode());
+		Assert.assertEquals(ResponseCodeEnum.SUCCESS.getCode(), response.getCode());
 	}
 
 	@Test
@@ -338,6 +339,28 @@ public class VehicleControlServiceTest {
 		} catch (Exception e) {
 			// Assert
 			Assert.assertEquals("No existe registro de ingreso del vehiculo", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void registerVehicleEntryIfExists() {
+
+		// Arrange
+		VehicleModel vehicleModel = aMotorcycle().build();
+
+		when(vehicleConverter.modelToEntity(any())).thenCallRealMethod();
+		when(vehicleControlRepository.existsByDepartureDateIsNullAndVehiclePlate(vehicleModel.getPlate()))
+				.thenReturn(true);
+
+		try {
+			// Act
+			vehicleControlService.registerVehicleEntry(vehicleModel);
+			fail();
+
+		} catch (Exception e) {
+			// Assert
+			Assert.assertEquals("Ya existe registro de ingreso del vehiculo", e.getMessage());
 		}
 
 	}
