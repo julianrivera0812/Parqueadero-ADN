@@ -4,9 +4,13 @@ buildscript {
 	}
 	repositories {
 		mavenCentral()
+		maven {
+      		url "https://plugins.gradle.org/m2/"
+    	}
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath ("gradle.plugin.net.foragerr.jmeter:jmeter-gradle-plugin:1.0.10-3.3")
 	}
 }
 
@@ -15,6 +19,7 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
+apply plugin: 'net.foragerr.jmeter'
 
 group = 'co.ceiba.adn'
 version = '0.0.1-SNAPSHOT'
@@ -58,3 +63,10 @@ task integrationTest(type: Test, description: 'Runs the integration tests', grou
 }
 
 jacocoTestReport.dependsOn(test, integrationTest)
+
+jmeter {
+	// jmTestFiles = [file("src/test/jmeter/serviceGetVehicleInParkingLT.jmx")] //if jmx file is not in the default location
+	// jmSystemPropertiesFiles= [file("src/test/jmeter/jmeter.properties")] //to add additional system properties
+	// enableReports = true
+	// enableExtendedReports = false //produce Graphical and CSV reports
+}
