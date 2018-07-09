@@ -29,12 +29,14 @@ import co.ceiba.adn.estacionamiento.entity.Motorcycle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 import co.ceiba.adn.estacionamiento.enumeration.ResponseCodeEnum;
+import co.ceiba.adn.estacionamiento.exception.ApplicationException;
 import co.ceiba.adn.estacionamiento.model.CarModel;
 import co.ceiba.adn.estacionamiento.model.MotorcycleModel;
 import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
 import co.ceiba.adn.estacionamiento.service.impl.VehicleControlServiceImpl;
+import co.ceiba.adn.estacionamiento.util.Action;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -115,11 +117,10 @@ public class VehicleControlServiceTest {
 
 		when(vehicleConverter.modelToEntity(any())).thenCallRealMethod();
 
-		// Act
-		ResponseDTO response = vehicleControlService.registerVehicleEntry(motorcycleModel);
+		applicationExceptionTest(() -> {
+			vehicleControlService.registerVehicleEntry(motorcycleModel);
+		}, ResponseCodeEnum.WITHOUT_SPACE);
 
-		// Assert
-		Assert.assertEquals(ResponseCodeEnum.WITHOUT_SPACE.getCode(), response.getCode());
 	}
 
 	@Test
@@ -136,15 +137,13 @@ public class VehicleControlServiceTest {
 
 		when(vehicleConverter.modelToEntity(any())).thenCallRealMethod();
 
-		// Act
-		ResponseDTO response = vehicleControlService.registerVehicleEntry(carModel);
-
-		// Assert
-		Assert.assertEquals(ResponseCodeEnum.WITHOUT_SPACE.getCode(), response.getCode());
+		applicationExceptionTest(() -> {
+			vehicleControlService.registerVehicleEntry(carModel);
+		}, ResponseCodeEnum.WITHOUT_SPACE);
 	}
 
 	@Test
-	public void vehicleEntryPlateNoStartWithA() {
+	public void vehicleEntryPlateNoStartWithA() throws ApplicationException {
 
 		// Arrange
 		MotorcycleModel motorcycleModel = aMotorcycle().withPlate("BTP88D").build();
@@ -166,7 +165,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentCarBy8Hours() {
+	public void calculatePaymentCarBy8Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 8;
@@ -180,7 +179,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentCarBy5Hours() {
+	public void calculatePaymentCarBy5Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 5;
@@ -194,7 +193,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentCarBy1DayAnd3Hours() {
+	public void calculatePaymentCarBy1DayAnd3Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 3;
@@ -209,7 +208,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentCarBy2DayAnd7Hours() {
+	public void calculatePaymentCarBy2DayAnd7Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 7;
@@ -224,7 +223,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentMotorcycleBy8Hours() {
+	public void calculatePaymentMotorcycleBy8Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 8;
@@ -238,7 +237,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentMotorcycleBy1DayAnd3Hours() {
+	public void calculatePaymentMotorcycleBy1DayAnd3Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 3;
@@ -253,7 +252,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentMotorcycle650CCBy1DayAnd3Hours() {
+	public void calculatePaymentMotorcycle650CCBy1DayAnd3Hours() throws ApplicationException {
 
 		// Arrange
 		int hours = 3;
@@ -296,7 +295,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentCar1Day3Hours() throws ParseException {
+	public void calculatePaymentCar1Day3Hours() throws ParseException, ApplicationException {
 
 		// Arrange
 		Date entryDate = dateFormat.parse("2016-02-14 10:00:00");
@@ -311,7 +310,7 @@ public class VehicleControlServiceTest {
 	}
 
 	@Test
-	public void calculatePaymentMotorcycle650cc10Hours() throws ParseException {
+	public void calculatePaymentMotorcycle650cc10Hours() throws ParseException, ApplicationException {
 
 		// Arrange
 		Date entryDate = dateFormat.parse("2018-07-03 07:00:00");
@@ -331,15 +330,9 @@ public class VehicleControlServiceTest {
 		VehicleModel vehicleModel = aMotorcycle().build();
 		when(vehicleControlRepository.findOneByDepartureDateIsNullAndVehiclePlate(anyString())).thenReturn(null);
 
-		try {
-			// Act
+		applicationExceptionTest(() -> {
 			vehicleControlService.registerVehicleExit(vehicleModel);
-			fail();
-
-		} catch (Exception e) {
-			// Assert
-			Assert.assertEquals("No existe registro de ingreso del vehiculo", e.getMessage());
-		}
+		}, ResponseCodeEnum.VEHICULE_WITHOUT_ENTRY);
 
 	}
 
@@ -353,16 +346,23 @@ public class VehicleControlServiceTest {
 		when(vehicleControlRepository.existsByDepartureDateIsNullAndVehiclePlate(vehicleModel.getPlate()))
 				.thenReturn(true);
 
+		applicationExceptionTest(() -> {
+			vehicleControlService.registerVehicleEntry(vehicleModel);
+		}, ResponseCodeEnum.DUPLICATED_ENTRY);
+
+	}
+
+	private void applicationExceptionTest(Action action, ResponseCodeEnum responseCodeEnum) {
+
 		try {
 			// Act
-			vehicleControlService.registerVehicleEntry(vehicleModel);
+			action.execute();
 			fail();
 
-		} catch (Exception e) {
+		} catch (ApplicationException e) {
 			// Assert
-			Assert.assertEquals("Ya existe registro de ingreso del vehiculo", e.getMessage());
+			Assert.assertEquals(responseCodeEnum, e.getResponseCodeEnum());
 		}
-
 	}
 
 }

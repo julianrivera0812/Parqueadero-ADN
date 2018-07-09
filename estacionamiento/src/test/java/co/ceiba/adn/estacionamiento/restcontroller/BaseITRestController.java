@@ -21,13 +21,14 @@ public abstract class BaseITRestController {
 		return mockMvc.perform(post(wsURI).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(modelTest)));
 	}
 
-	protected void postWSBadRequestIT(VehicleModel modelTest, String wsURI, MockMvc mockMvc) throws Exception {
+	protected void postWSBadRequestIT(VehicleModel modelTest, String wsURI, MockMvc mockMvc,
+			ResponseCodeEnum responseCodeEnum) throws Exception {
 
 		// Act
 		ResultActions resultActions = consumePostWS(modelTest, wsURI, mockMvc);
 
 		// Assert
-		assertBadRequest(resultActions);
+		assertBadRequest(resultActions, responseCodeEnum);
 	}
 
 	protected ResultActions consumeGetWS(String wsURI, String queryParams, MockMvc mockMvc) throws Exception {
@@ -44,10 +45,9 @@ public abstract class BaseITRestController {
 		resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(ResponseCodeEnum.SUCCESS.getCode())));
 	}
 
-	protected void assertBadRequest(ResultActions resultActions) throws Exception {
+	protected void assertBadRequest(ResultActions resultActions, ResponseCodeEnum responseCodeEnum) throws Exception {
 
-		resultActions.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code", is(ResponseCodeEnum.BAD_REQUEST.getCode())));
+		resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.code", is(responseCodeEnum.getCode())));
 	}
 
 }

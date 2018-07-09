@@ -88,7 +88,8 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		ResultActions resultWS = consumePostWS(modelTest, API_VEHICLE_REGISTER_MOTORCYCLE_ENTRY, mvc);
 
 		// Assert
-		resultWS.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(ResponseCodeEnum.WITHOUT_SPACE.getCode())));
+		resultWS.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code", is(ResponseCodeEnum.WITHOUT_SPACE.getCode())));
 		List<VehicleControl> found = vehicleControlRepository
 				.findByDepartureDateIsNullAndVehiclePlate(modelTest.getPlate());
 		assertThat(found).hasSize(0);
@@ -121,7 +122,8 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		ResultActions resultWS = consumePostWS(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc);
 
 		// Assert
-		resultWS.andExpect(status().isOk()).andExpect(jsonPath("$.code", is(ResponseCodeEnum.WITHOUT_SPACE.getCode())));
+		resultWS.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code", is(ResponseCodeEnum.WITHOUT_SPACE.getCode())));
 		List<VehicleControl> found = vehicleControlRepository
 				.findByDepartureDateIsNullAndVehiclePlate(modelTest.getPlate());
 		assertThat(found).hasSize(0);
@@ -133,16 +135,16 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		// Arrange
 		CarModel modelTest = aCar().withPlate("CAR001").build();
 
-		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc);
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc, ResponseCodeEnum.DUPLICATED_ENTRY);
 	}
-	
+
 	@Test
 	public void registerMotorcycleEntry_whenExistsEntry_thenBadRequestResponseCode3() throws Exception {
 
 		// Arrange
 		CarModel modelTest = aCar().withPlate("MOT01D").build();
 
-		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc);
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_CAR_ENTRY, mvc, ResponseCodeEnum.DUPLICATED_ENTRY);
 	}
 
 	private void fillParkingSpace(VehicleTypeEnum vehicleType) {
@@ -191,7 +193,7 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		// Arrange
 		MotorcycleModel modelTest = aMotorcycle().withPlate(null).build();
 
-		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_VEHICLE_EXIT, mvc);
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_VEHICLE_EXIT, mvc, ResponseCodeEnum.BAD_REQUEST);
 	}
 
 	@Test
@@ -222,7 +224,7 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		// Arrange
 		CarModel modelTest = aCar().withPlate(null).build();
 
-		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_VEHICLE_EXIT, mvc);
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_VEHICLE_EXIT, mvc, ResponseCodeEnum.BAD_REQUEST);
 	}
 
 	@Test
@@ -231,7 +233,7 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		// Arrange
 		CarModel modelTest = aCar().withPlate("SIN123").build();
 
-		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_VEHICLE_EXIT, mvc);
+		postWSBadRequestIT(modelTest, API_VEHICLE_REGISTER_VEHICLE_EXIT, mvc, ResponseCodeEnum.VEHICULE_WITHOUT_ENTRY);
 	}
 
 	@Test
@@ -244,7 +246,7 @@ public class VehicleControlControllerIT extends BaseITRestController {
 		ResultActions resultGet = consumeGetWS(API_VEHICLE_GET_VEHICLE_IN_PARKING_PAGINATED, queryParams, mvc);
 
 		// Assert
-		assertBadRequest(resultGet);
+		assertBadRequest(resultGet, ResponseCodeEnum.INVALID_PAGINATED_PARAMS);
 	}
 
 	@Test

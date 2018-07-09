@@ -18,6 +18,7 @@ import co.ceiba.adn.estacionamiento.entity.Vehicle;
 import co.ceiba.adn.estacionamiento.entity.Vehicle.VehicleTypeEnum;
 import co.ceiba.adn.estacionamiento.entity.VehicleControl;
 import co.ceiba.adn.estacionamiento.enumeration.ResponseCodeEnum;
+import co.ceiba.adn.estacionamiento.exception.ApplicationException;
 import co.ceiba.adn.estacionamiento.model.VehicleModel;
 import co.ceiba.adn.estacionamiento.repository.VehicleControlRepository;
 import co.ceiba.adn.estacionamiento.repository.VehicleRepository;
@@ -26,6 +27,8 @@ import co.ceiba.adn.estacionamiento.util.DateValidator;
 
 @Service
 public class VehicleControlServiceImpl implements VehicleControlService {
+
+	private static final String LETRA_A_NO_PERMITIDA = "A";
 
 	private VehicleRepository vehicleRepository;
 
@@ -41,37 +44,33 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 		this.vehicleConverter = vehicleConverter;
 	}
 
-	public ResponseDTO registerVehicleEntry(VehicleModel vehicleModel) {
+	public ResponseDTO registerVehicleEntry(VehicleModel vehicleModel) throws ApplicationException {
 
 		Date currentDate = new Date();
 
 		Vehicle vehicle = vehicleConverter.modelToEntity(vehicleModel);
 
-		ResponseDTO response = new ResponseDTO();
+		doEntryValidations(vehicleModel, currentDate, vehicle);
+
+		saveRegisterEntryData(vehicleModel, currentDate, vehicle);
+
+		return new ResponseDTO();
+	}
+
+	private void doEntryValidations(VehicleModel vehicleModel, Date currentDate, Vehicle vehicle)
+			throws ApplicationException {
 
 		if (vehicleControlRepository.existsByDepartureDateIsNullAndVehiclePlate(vehicle.getPlate())) {
-
-			throw new IllegalArgumentException("Ya existe registro de ingreso del vehiculo");
+			throw new ApplicationException(ResponseCodeEnum.DUPLICATED_ENTRY);
 		}
 
-		if (hasSpaceForVehicle(vehicle)) {
-
-			if (isEnableDayByPlate(vehicleModel.getPlate(), currentDate)) {
-
-				saveRegisterEntryData(vehicleModel, currentDate, vehicle);
-
-			} else {
-
-				response.setCode(ResponseCodeEnum.NOT_ENTRY_BY_DAY.getCode());
-				response.setMessage(ResponseCodeEnum.NOT_ENTRY_BY_DAY.getMessage());
-			}
-
-		} else {
-			response.setCode(ResponseCodeEnum.WITHOUT_SPACE.getCode());
-			response.setMessage(ResponseCodeEnum.WITHOUT_SPACE.getMessage());
+		if (!hasSpaceForVehicle(vehicle)) {
+			throw new ApplicationException(ResponseCodeEnum.WITHOUT_SPACE);
 		}
 
-		return response;
+		if (!isEnableDayByPlate(vehicleModel.getPlate(), currentDate)) {
+			throw new ApplicationException(ResponseCodeEnum.NOT_ENTRY_BY_DAY);
+		}
 	}
 
 	private void saveRegisterEntryData(VehicleModel vehicleModel, Date currentDate, Vehicle vehicle) {
@@ -82,7 +81,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 		vehicleControlRepository.save(new VehicleControl(vehicle, currentDate));
 	}
 
-	public RegisterExitOutDTO registerVehicleExit(VehicleModel vehicleModel) {
+	public RegisterExitOutDTO registerVehicleExit(VehicleModel vehicleModel) throws ApplicationException {
 
 		Date currentDate = new Date();
 
@@ -104,7 +103,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 			response.setPaymentValue(paymentValue);
 		} else {
-			throw new IllegalArgumentException("No existe registro de ingreso del vehiculo");
+			throw new ApplicationException(ResponseCodeEnum.VEHICULE_WITHOUT_ENTRY);
 		}
 
 		return response;
@@ -114,7 +113,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 
 		boolean result = true;
 
-		if (plate.startsWith("A") && !DateValidator.isMondayOrSunday(date)) {
+		if (plate.startsWith(LETRA_A_NO_PERMITIDA) && !DateValidator.isMondayOrSunday(date)) {
 			result = false;
 		}
 
@@ -125,7 +124,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 		return vehicleControlRepository.countByDepartureDateIsNull(vehicleType).orElse(0L);
 	}
 
-	public boolean hasSpaceForVehicle(Vehicle vehicle) {
+	public boolean hasSpaceForVehicle(Vehicle vehicle) throws ApplicationException {
 
 		int maxValue = getMaxAmountVehicle(vehicle.getTypeEnum());
 
@@ -133,7 +132,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 	}
 
 	public BigDecimal calculatePaymentByVehicleType(VehicleTypeEnum vehicleType, int days, int hours,
-			boolean hasIncrement) {
+			boolean hasIncrement) throws ApplicationException {
 
 		BigDecimal paymentValue = null;
 
@@ -150,7 +149,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 			break;
 
 		default:
-			throw new IllegalArgumentException("Tipo de vehiculo no valido");
+			throw new ApplicationException(ResponseCodeEnum.INVALID_VEHICLE_TYPE);
 		}
 
 		return paymentValue;
@@ -165,7 +164,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 	}
 
 	public BigDecimal calculatePaymentByDates(Date entryDate, Date departureDate, VehicleTypeEnum vehicleType,
-			boolean hasIncrement) {
+			boolean hasIncrement) throws ApplicationException {
 
 		int totalHours = calculateTotalHours(entryDate, departureDate);
 
@@ -186,7 +185,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 		return paymentValue;
 	}
 
-	private int getMaxAmountVehicle(VehicleTypeEnum vehicleType) {
+	private int getMaxAmountVehicle(VehicleTypeEnum vehicleType) throws ApplicationException {
 		int maxAmount = 0;
 
 		switch (vehicleType) {
@@ -197,7 +196,7 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 			maxAmount = VehicleLimitConstants.MAX_AMOUNT_MOTORCYCLE;
 			break;
 		default:
-			throw new IllegalArgumentException("Tipo de vehiculo no valido");
+			throw new ApplicationException(ResponseCodeEnum.INVALID_VEHICLE_TYPE);
 		}
 		return maxAmount;
 	}
@@ -216,12 +215,12 @@ public class VehicleControlServiceImpl implements VehicleControlService {
 				&& ((Motorcycle) vehicle).getCylinderCapacity() > VehicleLimitConstants.LIMIT_CC_FOR_INCREMENT;
 	}
 
-	public GetVehicleInParkingPaginatedDTO getVehicleInParking(Integer page, Integer size) {
+	public GetVehicleInParkingPaginatedDTO getVehicleInParking(Integer page, Integer size) throws ApplicationException {
 
 		GetVehicleInParkingPaginatedDTO response = new GetVehicleInParkingPaginatedDTO();
 
 		if (page == null || size == null || page < 0 || size < 0) {
-			throw new IllegalArgumentException("Parámetros de paginación incorrectos");
+			throw new ApplicationException(ResponseCodeEnum.INVALID_PAGINATED_PARAMS);
 		} else {
 			response.setPage(vehicleControlRepository.findByDepartureDateIsNull(PageRequest.of(page, size)));
 		}
