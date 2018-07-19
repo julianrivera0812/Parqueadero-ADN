@@ -1,8 +1,8 @@
 spring:
  datasource:
    url: jdbc:mysql://192.168.2.147:3306/estacionamiento
-   username: julian.rivera
-   password: Swatit1991$
+   username: ceibaadn
+   password: ceibaadn
  jpa:
    show-sql: true
    hibernate:
